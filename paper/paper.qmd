@@ -1,6 +1,5 @@
 ---
 title: "Election Predictions:A Data-Driven Approach to US Election Forecasting"
-subtitle: "My subtitle if needed"
 author: 
   - Ziheng Wang
   - Manjun Zhu
