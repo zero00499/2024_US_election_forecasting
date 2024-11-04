@@ -1,0 +1,480 @@
+---
+title: "Election Predictions:A Data-Driven Approach to US Election Forecasting"
+subtitle: "My subtitle if needed"
+author: 
+  - Ziheng Wang
+  - Manjun Zhu
+  - Dong Jun Yoon
+thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+date: today
+date-format: long
+abstract: This paper analyzes the distribution of voter preferences across demographics and regions in the United States using both simulated and survey data. Key findings reveal significant variations in political leanings based on race, gender, education level, and geographic location (urban vs. rural), with distinct approval patterns for candidates like Joe Biden and Kamala Harris. Additionally, comparisons between states highlight differences in safety and economic concerns among voters, which correlate with their past voting behavior. This study underscores the importance of post-stratification adjustments in survey data to achieve a more accurate representation of public opinion, shedding light on demographic-driven electoral dynamics that impact the political landscape.
+format: pdf
+number-sections: true
+bibliography: references.bib
+pdf-engine: xelatex
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(corrplot)
+library(Hmisc)
+library(GGally)
+library(skimr)
+library(knitr)
+```
+
+
+# Introduction
+
+*Overview* 
+Presidential elections are among the most significant events in American politics, shaping the political and economic landscape for the next four years. The outcome of the 2024 U.S. election will influence not only the American economy but also the global economy. In this context, accurately forecasting electoral outcomes is crucial for anticipating shifts in political power and predicting economic policies.
+
+Polling is a commonly used tool to understand public opinion. However, it may lack accuracy due to various biases, such as social desirability bias, non-response bias, and sampling error. In this paper, we attempt to construct a model measures ....
+
+*Estimand* 
+In this paper the estimand is the percentage of support of each candidate, Donald Trump and Hamala Harris. We construct a linear model to estimate various predictors, which are transparency score, poll score, numeric grade, state, sample size, number of days. The model is used to identify the most influential factor for preferences of pollsters and analyze relationships between variables.
+
+*Results paragraph:* Summarize the key findings of the model, highlighting its predictive accuracy and implications.
+
+*Why it matter* 
+Our findings are helpful to political scholars who work on current political dynamics, economic policy analysts and sociologists, as we provide in-depth understanding of influential factors of pollster’s preference and predict the winner of the election. Different candidates have different economic plans due to their different opinions on the economy.
+
+Telegraphing paragraph: 
+The remainder of this paper is structured as follows: Section 2 details the data and measurement process; Section 3 covers model development and results; Section 4 discusses implications and future steps.
+The remainder of this paper is structured as follows. @sec-data...
+
+
+
+# Data {#sec-data}
+
+## Overview
+We obtained the "Presidential General Election Polls" dataset from FiveThirtyEight [@FiveThirtyEight2024] and conducted an in-depth analysis using the R programming language [@citeR].
+This analysis utilizes a dataset containing polling data for the 2024 U.S. Presidential Election. It includes key details such as the quality of each poll, sample size, geographic scope, and the timing of data collection. The dataset is designed to track voter support trends for the candidates Kamala Harris and Donald Trump.
+The data were obtained from FiveThirtyEight’s national polling dataset for the 2024 U.S. presidential election. This dataset, published on FiveThirtyEight’s platform, contains comprehensive polling data collected by various polling organizations. It includes information such as polling dates, candidate preferences, sample sizes, and margins of error for general election polling conducted across the United States. The data is collected from January 2024 to the present, capturing public opinion trends leading up to the 2024 election and allowing for analysis of voter sentiment over time and across different demographics and regions.
+
+## Measurement
+For this analysis, the dataset comprises polling information gathered from multiple sources, each employing distinct methodologies and inherent biases. Although adjustments and weighting are applied to address these differences, limitations may persist, particularly regarding sample representation and measurement error. Polls with lower quality scores or limited transparency may contribute additional variability to the analysis.
+
+## Data Cleaning
+To ensure high-quality and reliable insights from the polling data, the dataset was filtered based on the 'partisan' and 'pollscore'. Specifically, we retained only records where 'partisan' is missing (indicating no background support) and 'pollscore' is greater than 0, as this reflects polls with better accuracy and reliability. This step refines the dataset to focus on more trustworthy polling data.
+
+## Outcome variables
+The primary outcome variable is the percentage of support for each candidate, reflecting the proportion of respondents who express support for either Kamala Harris or Donald Trump at a specific point in time.
+
+```{r}
+#| label: fig-bills
+#| fig-cap: Bills of penguins
+#| echo: false
+
+set.seed(251)
+
+# Read the analysis data
+poll_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+
+# Show 10 random rows
+sampled_data <- sample_n(poll_data, 10)
+print(sampled_data)
+```
+
+## Predictor variables
+
+### Numeric Grade
+"Numeric_grade" is a numerical rating assigned to each pollster, reflecting the reliability and overall quality of the pollster’s data collection. A higher grade denotes stronger pollster credibility and consistent performance.
+
+### Transparency Score
+"Transparency_score" measures the level of openness a pollster has in disclosing their methodology, with scores up to a maximum of 10. Higher transparency scores are associated with greater reliability, as they indicate detailed data-sharing practices. This variable is used to examine how transparency influences polling outcomes.
+
+### State
+The "state" variable represents the U.S. state where the poll is conducted or focused, capturing regional variations in voter support. Including state-level data allows the model to account for unique local trends that might affect voting behavior across different regions.
+
+### Duration
+"Duration" represents the number of days from the start date of the polling period to the election date(Nov 4th). This predictor is intended to capture the temporal dynamics of voter sentiment and polling trends as the election approaches. By quantifying the time elapsed, duration allows for an analysis of how public opinion may shift over time, providing insights into the effectiveness of campaign strategies and the impact of external events on voter behavior. A shorter duration may indicate a more immediate influence of recent events on polling data, while a longer duration may reflect more stable trends in voter preferences.
+
+### Party
+The "party" variable indicates the political affiliation of the candidate within each poll, such as "DEM" for Democrats or "REP" for Republicans. This variable helps in distinguishing the voting trends and support levels between the parties represented in the analysis.
+
+### Hypothetical
+This variable indicates whether the poll reflects a real or hypothetical match-up scenario. Polls marked as $FALSE$ represent actual, live election match-ups. Including this variable in our linear regression model allows us to differentiate the reliability and predictive power of real versus hypothetical scenarios.
+
+
+```{r}
+#| label: fig-heatmap
+#| fig-cap: Correlation Matrix of Numeric Grade, Transparency, and Pollscore
+#| echo: false
+#| warning: false
+#| message: false
+
+# Calculate correlation matrix
+cor_matrix <- rcorr(as.matrix(poll_data[, c("numeric_grade", "transparency_score", "pollscore")]))
+
+# Create a heatmap of the correlation matrix
+corrplot(cor_matrix$r, 
+         method = "color", 
+         type = "upper", 
+         order = "hclust", 
+         addCoef.col = "black", 
+         tl.col = "black", 
+         tl.srt = 45, 
+         diag = FALSE,
+         main = "Correlation Heatmap")
+```
+
+
+```{r}
+#| label: fig-pairs-plot
+#| fig-cap: Correlation Plot
+#| echo: false
+#| warning: false
+#| message: false
+
+# Create a pairs plot
+ggpairs(poll_data[, c("duration", "transparency_score", "pollscore")],
+        title = "Correlation between each predictors")
+```
+
+When selecting predictors for the model, addressing the assumption of uncorrelated errors was critical. Uncorrelated errors is violated when two or more predictor variables are highly correlated, which can inflate the variance of coefficient estimates and diminish model reliability. If this assumption is violated, it could lead to inefficient coefficient estimates and incorrect inferences about the model's predictors. The Correlation Matrix(@fig-heatmap) indicates a significant correlation between $numericgrade$ and $pollscore$, and $numericgrade$ and $transparencyscore$, suggesting that these variables assess similar aspects of polling quality.
+To avoid the violation of uncorrelated errors, we decided to exclude $numericgrade$ from our model, which also avoids redundancy and enhances the stability of coefficient estimates.
+
+
+In the correlation plot (@fig-pairs-plot),the correlations between $pollscore$, $duration$, and $transparency_score$ are relatively low. This suggests that these predictors do not exhibit significant linear relationships with one another, which is an important consideration in regression analysis, so these predictors will be considered in the further analysis.
+
+
+```{r}
+#| label: fig-hypothetical
+#| echo: false
+#| warning: false
+#| message: false
+
+# Create a boxplot of pct by hypothetical
+ggplot(poll_data, aes(x = as.factor(hypothetical), y = pct)) +
+  geom_boxplot(fill = "skyblue", outlier.color = "red") +
+  labs(title = "Distribution of pct by Hypothetical Status",
+       x = "Hypothetical",
+       y = "Pct") +
+  theme_minimal()
+```
+From the boxplot (@fig-hypothetical), voters tend to express stronger preferences when the hypothetical scenario is presented as True, leading to more polarized voting behavior. This could indicate that voters are more decisively aligned with their preferred candidate in hypothetical match-ups compared to more generalized scenarios.
+The larger difference in the hypothetical scenario might also indicate that voter preferences are more susceptible to change based on specific campaign narratives or media portrayals, suggesting that candidates could capitalize on this by crafting targeted messages in their campaigns.
+
+```{r}
+#| label: fig-baseline
+#| fig-cap: Support Rate over Time
+#| echo: false
+#| warning: false
+#| message: false
+
+# First, filter the data to include only rows with Harris and Trump as candidates
+filtered_candidates <- poll_data %>%
+  filter(candidate_name %in% c("Kamala Harris", "Donald Trump"))
+
+# Calculate pct change over time for each candidate
+pct_change_data <- filtered_candidates %>%
+  arrange(candidate_name, end_date) %>%  # Sort by candidate and end_date
+  filter(end_date > as.Date("2024-03-01")) %>% 
+  group_by(candidate_name) %>%
+  ungroup()
+
+pct_change_data$end_date <- as.Date(pct_change_data$end_date)
+
+# Plot the percentage change over time for each candidate with a 4-month break on x-axis
+ggplot(pct_change_data, aes(x = end_date, y = pct, color = candidate_name)) +
+  geom_point(size = 1, alpha = 0.2) +
+  geom_smooth() +
+  labs(title = "Percentage Change in Support for Harris and Trump Over Time",
+       x = "End Date",
+       y = "Percentage Change in Support (%)",
+       color = "Candidate") +
+  scale_color_manual(values = c("Kamala Harris" = "blue", "Donald Trump" = "red")) +
+  theme_minimal() +
+  scale_x_date(date_breaks = "1 months", date_labels = "%b %Y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+To gain insights into the overall trends in the data, we performed exploratory data analysis(@fig-overall) through summary statistics and visual representations. Figure 1 (below) depicts the polling percentages for each candidate over time, providing a clear view of the shifts in voter support as the election approaches."
+
+```{r}
+#| label: fig-swing-states
+#| fig-cap: Interaction of a Specific Predictor and Response by Party
+#| echo: false
+#| warning: false
+#| message: false
+
+
+# Convert end_date to Date class if not already done
+poll_data$end_date <- as.Date(poll_data$end_date)
+
+
+# Step 1: Categorize states as Swing states (example includes key swing states)
+swing_data <- poll_data %>%
+  filter(end_date > as.Date("2024-03-01")) %>% 
+  filter(candidate_name %in% c("Kamala Harris", "Donald Trump")) %>% 
+  mutate(state_type = case_when(
+    state %in% c("Pennsylvania", "Michigan", "Florida", "Arizona", "Wisconsin") ~ "Swing",
+    TRUE ~ "Other"  # Any state not categorized as Swing is labeled as "Other"
+  ))
+
+# Step 2: Generate the plot for Swing states only
+swing_state_plot <- ggplot(swing_data %>% filter(state_type == "Swing"), 
+                           aes(x = end_date, y = pct, color = candidate_name)) +
+  geom_point() +
+  geom_smooth(method = "lm", aes(group = candidate_name)) +
+  facet_wrap(~ state) +
+  labs(
+    x = "Time",
+    y = "Support Rate",
+    title = "Support Rate Over Time - Swing States"
+  ) +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 months", date_labels = "%b")
+
+# Display the Swing states plot
+print(swing_state_plot)
+
+```
+This figure (@fig-swing-states) presents the polling percentages across key swing states, highlighting the varying levels of support for candidates in different regions that are crucial for the election result. This visualization allows us to assess the competitive states and identify trends that may influence electoral outcomes. 
+
+
+
+```{r}
+#| label: fig-ab-test
+#| fig-cap: AB-Test
+#| echo: false
+#| warning: false
+#| message: false
+
+# Filter data for Kamala Harris and Donald Trump
+ab_data <- poll_data %>%
+  filter(candidate_name %in% c("Kamala Harris", "Donald Trump")) %>%
+  # Convert candidate_name to factor
+  mutate(candidate_name = as.factor(candidate_name))
+
+# Conduct a two-sample t-test
+t_test <- t.test(pct ~ candidate_name, data = ab_data)
+print(t_test)
+
+```
+p-value (0.1607): This is the probability of observing a test statistic at least as extreme as the one obtained, under the null hypothesis (no difference in means between groups). Since the p-value (0.1607) is higher than the standard significance level (e.g., 0.05), it suggests that we do not have strong evidence to reject the null hypothesis. In other words, there isn't a statistically significant difference in polling percentages between Donald Trump and Kamala Harris in this dataset.
+
+95% Confidence Interval (-0.181, 1.087): This interval estimates the range within which the true difference in means likely lies, with 95% confidence. Since 0 is within this range, it’s consistent with the conclusion that there's no significant difference between the two candidates' polling percentages.
+
+Based on the data(@fig-ab-test), there’s no statistically significant difference in the average polling percentages between Donald Trump and Kamala Harris. The observed difference is small and could reasonably have occurred by chance.
+
+Since the t-test showed no significant difference, to explore and gain deeper insights, we will include an interaction between pollscore and transparency_score could indicate if support for each candidate varies by state. By including interaction terms, some significant differences that simple group comparisons miss will be noticed.
+
+# Model
+The goal of our modelling strategy is twofold. Firstly, we introduce a primary model provide a detailed Current Votes Overview and a Historical Trends Analysis for two candidates in the upcoming election. The Current Votes Overview aggregates real-time polling data to offer an up-to-date snapshot of voter sentiment. This component emphasizes the latest trends in candidate support, enabling us to identify fluctuations and emerging patterns that could influence the election outcome. The Historical Trends Analysis examines past voting behaviors for the two candidates, analyzing historical polling data to uncover patterns and trends over time. By investigating how voter preferences have shifted in previous elections and during significant events, this analysis aims to provide insights into the factors that have historically influenced electoral outcomes.
+
+Secondly, we have second model specifically focused on understanding voting behavior in swing states, which are critical in determining the outcome of elections. The model incorporates several key predictors, including pollscore, transparency score, duration, and party, allowing for a nuanced analysis of voter preferences. By integrating these variables, we aim to capture the complex dynamics that drive electoral decisions in swing states. Additionally, the model explores interaction terms, enable us to investigate how the relationships between these variables may vary across different contexts, revealing insights into how voter sentiment is shaped by local political landscapes and candidate messaging.
+
+
+## Model set-up
+### Model 1: Percentage of support as a function of end date
+
+The first model investigates how the end date of a poll impacts the percentage of support for Trump.
+The linear regression model is specified as follows:
+
+Where:
+
+- $\beta_0$ represents the intercept, which is the baseline level of support
+- $\beta_1$ captures the effect of the end date on percentage support
+- $\epsilon_i$ is the error term, assumed to follow a normal distribution with a mean of 0 and variance $\sigma^2$
+
+```{r}
+#| label: fig-model1
+#| fig-cap: set up model
+#| echo: false
+#| warning: false
+#| message: false
+
+filtered_data <- poll_data %>%
+  filter(candidate_name %in% c("Kamala Harris", "Donald Trump"))
+
+data <- filtered_data %>%
+    mutate(candidate_state = interaction(candidate_name, state))
+
+model <- lm(pct ~ end_date + candidate_name, data = data)
+
+summary(model)
+```
+
+### Model 2: Percentage of support as a function of multiple predictors and interaction
+
+We analyze the percentage of support by including more variables: the states that conduct the polls, the interaction between poll score and transparency score, and the polls' duration. The model is as follows:
+
+
+Where:
+
+- $beta_0$ represents the percentage support for Trump in poll $i$,
+- $beta_1$, $beta_2$, $beta_3$, $beta_4$, $beta_5$, $beta_6$, $beta_7$, $beta_8$ are the coefficients corresponding to each predictor variable, measuring their individual effects
+- $\epsilon_i$ is the error term, assumed to follow a normal distribution with a mean of 0 and variance $\sigma^2$
+
+```{r}
+#| label: fig-model2
+#| fig-cap: set up model
+#| echo: false
+#| warning: false
+#| message: false
+
+filtered_data <- poll_data %>%
+  filter(candidate_name %in% c("Kamala Harris", "Donald Trump"))
+
+data <- filtered_data %>%
+    mutate(candidate_state = interaction(candidate_name, state))
+
+model <- lm(pct ~ pollscore * transparency_score + party + state + duration + candidate_name, data = data)
+
+summary(model)
+```
+
+### Model justification
+The use of multiple linear regression with interaction terms is justified for this analysis of candidate support for several compelling reasons. First and foremost, incorporating interaction terms allows for a nuanced examination of how the relationship between the predictors and the response variable—percentage of support for each candidate—varies across different groups.This is particularly important in political analysis, where the effect of factors like state or transparency scores on candidate support may not be uniform. By including these interaction terms, the model captures the complexities of voter behavior, reflecting how the impact of one predictor may change depending on the level of another.
+
+Secondly, linear regression is well-suited for this analysis because it assumes a linear relationship between the predictors and the response variable. Given that the factors influencing voter support, such as polling quality and sample size, are anticipated to have a linear effect, this model aligns well with the data. The interactions add complexity but remain grounded in the linear framework, allowing for straightforward interpretation of the results. Moreover, the inclusion of both continuous and categorical predictors—such as “numeric_grade,” “transparency_score,” “state,” and “party”—enhances the model's flexibility.
+
+Furthermore, the use of linear regression facilitates the identification of potential issues such as multicollinearity among predictors. By carefully selecting which variables to include and excluding highly correlated predictors, the model enhances the reliability and interpretability of the coefficient estimates. This attention to model specification ensures that the insights drawn from the analysis are robust and meaningful.
+
+In conclusion, the integration of interaction terms within the linear regression framework provides a powerful method for understanding and predicting candidate support in the context of the 2024 U.S. Presidential Election. This approach not only captures the additive effects of individual predictors but also reveals the intricate ways in which these factors interact to influence voter behavior, making it an ideal choice for this analysis.
+
+
+# Results
+
+Our results are summarized in @tbl-modelresults.
+##Result of Model 1
+
+
+for model 2 we added more predictors, including transparency_score, party, state, duration, candidate_name. The intercept is 47.65618
+
+Overall, the expanded Model 2 captures more variation in support, with state, poll score, and pollster contributing significantly to the predictive power.
+
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| label: tbl-trendmodelresult
+#| tbl-cap: Overall-Trend Modell Result
+library(rstanarm)
+
+first_model <-
+  readRDS(file = here::here("models/first_model.rds"))
+
+
+```
+```
+
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-modelresults
+#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
+#| warning: false
+
+modelsummary::modelsummary(
+  list(
+    "First model" = first_model
+  ),
+  statistic = "mad",
+  fmt = 2
+)
+```
+
+# Discussion
+
+## First discussion point {#sec-first-point}
+
+If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+
+## Second discussion point
+
+Please don't use these as sub-heading labels - change them to be what your point actually is.
+
+## Third discussion point
+
+## Weaknesses and next steps
+
+While both models offer valuable insights, there are several limitations that should be acknowledged. The reliance on polling data are variability and potential biases, including factors like non-response bias, sampling errors, and discrepancies in data collection techniques among different polling organizations. Moreover, both models presuppose a linear trajectory of polling shifts leading up to election day, which may overlook abrupt changes in voter sentiment caused by unexpected events, shifts in campaign strategies, or emerging social issues.
+
+Additionally, the Baseline Model’s use of national aggregates can obscure the distinct political contexts within individual states, potentially glossing over the complexities of regional voting patterns. Conversely, the Primary Model’s focus on state-specific data demands a wealth of local information that may not be uniformly accessible or trustworthy across all swing states, limiting the comprehensiveness of the analysis.
+
+Future research can enhance this study by incorporating real-time data streams, such as social media sentiment and Google Trends, to dynamically capture shifts in voter opinion as events unfold. Machine learning techniques, like random forests or gradient boosting, could reveal complex, non-linear interactions among variables, while Bayesian hierarchical modeling would improve post-stratification by factoring in prior knowledge of demographics and regional preferences. Including economic indicators, such as inflation and unemployment, could help explain shifts in voter sentiment, while geospatial analysis at district or county levels could provide more detailed insights into local influences and differences between urban and rural areas.These approaches would deepen the understanding of voter preferences and enhance the predictive power of election models.
+
+
+
+\newpage
+
+\appendix
+
+# Appendix {-}
+## Appendix A: Pollster Methodology Overview {-}（改）
+Emerson College Polling is a non-partisan organization which established 25 years ago as classroom excercise and was transformed into an innovative, nationally-ranked polling center in 2012 (@Aboutus). In general, the emerson college define their population to be "registered voters, likely voters, or residents"(@Aboutus), but for the 2024 US President Election Poll, the population is defined to be only "likely voters" based on "2024 national poll".
+
+Emerson College Polling recruits respondents using a diverse recruitment strategy, including "MMS-to-Online", "Online Opt-in Panel", "IVR (Interactive Voice Response)" (@Aboutus & Polls). Generally there is an additional approach named "Emails"(@Aboutus), but we did not find the sign that it was used in 2024 Election surveys(National polling), so we do not include it in this paper. "MMS-to-Online" is an approach which the target population receive text messages with a custom graphic that invite them to take the online-survey hosted on Qualtrics. The respondents are select randomly from "state voter files provided by Aristotle". In Online Opt-in Panel approach, respondents are invited to take a "screening questionnaire"(@Aboutus) through an online opt-in panel "provided by CINT"(@Aboutus), respondents who pass the screening questionnaire are directed to the survey. Data quality are measured using additional screening questions, respondents who do not meet data quality measures are removed from the survey. Based on "Polling", respondents are selected from "L2 voter file data provided by Rep Data". In IVR (Interactive Voice Response) approach, respondents reveive automated calls, they answer the survey using their telepones.IVR is not used in some states where it is prohibited (@Aboutus) Respondents are selected randomly from "state voter files, provided by Aristotle"(@Aboutus).
+
+Based on the method of recuiting people and the target population, we can deduce the sampling frame are likely voters who are able to use landline telepone and cellphone. The sample size of likely voters is 1000 according to "November 2024 National Poll: Trump and Harris Remain Locked in Tight Race". The data sets were "weighted by gender, education, race, age, party registration, and region based on 2024 likely voter modeling" according to "November 2024 National Poll: Trump and Harris Remain Locked in Tight Race".
+
+Emerson College Polling employs a random sampling approach, specifically through MMS-to-online surveys and IVR (Interactive Voice Response) calls to landlines. In "MMS-to-Online" and "IVR (Interactive Voice Response)", a non-probability sampling approach is used, specifically, a random sampling approach. In "Online Opt-in Panel", a probability sampling approach is used, but we do not find the specific sampling approach. In this case, we conclude the general sampling approach is random sampling approach. A random sampling approach has notable advantages. It helps reduce selection bias by providing multiple ways for individuals to participate based on their preferences, increasing the chances of capturing a diverse range of respondents. This can enhance the representativeness of the sample, as each individual has an equal chance of being selected, potentially making the results more generalizable to the larger population. However, this approach has limitations. Each method, such as IVR calls versus online surveys, can introduce slight variations in response patterns, which can lead to inconsistencies in the data and reduce reliability. Furthermore, implementing a random sampling approach is often time-consuming and costly, as it requires extensive planning and resources to reach a wide, representative audience effectively
+
+There is also no clear indication of how Emerson College Polling handled non-responses. Consequently, we cannot rule out the possibility of non-response bias, which arises when non-respondents differ meaningfully from respondents. Additionally, we cannot assess the impact of non-response or achieve more representative polling results.
+
+Emerson’s approach to questionnaire design(2024) emphasizes precision, objectivity, and participant engagement. By employing clear and straightforward language, Emerson minimizes the risk of misinterpretation, ensuring that respondents can easily understand and accurately respond to questions. The use of neutral wording is crucial in preventing any inadvertent bias, allowing participants to express their views without feeling led toward specific answers. In addition to clarity, Emerson utilizes a randomized order for both questions and response options. Such randomization enhances the survey’s reliability and validity, contributing to a more accurate representation of public sentiment. Emerson’s commitment to a balanced and methodologically sound approach ensures that findings are credible and actionable.
+
+Quality control is integral to Emerson's survey process(2024), bolstering the integrity of the data collected. The organization implements rigorous measures to verify respondent identities and track response patterns. Instances of inconsistent or suspicious responses are flagged for further review, with problematic data excluded from analysis, which helps maintain a high standard of data quality.
+
+While Emerson(2024) focuses on asking straightforward questions, it may limit the depth of insight into complex issues. Respondents might not have the opportunity to articulate their nuanced opinions, particularly on multifaceted topics such as political preferences or economic concerns. Although this approach yields valuable top-line data, there is a trade-off in terms of capturing the subtleties that drive voter behavior and opinion formation.
+
+## Appendix B: Methodology and Survey Design for 2024 U.S. Presidential Election Forecast
+
+##B.1 Sampling approach
+Total Sample Size: 6,000 respondents (1,000 participants per targeted demographic).
+Target Population: Eligible voters across the following key demographics: urban areas, suburban regions, and rural communities in swing states: Florida, Ohio, Iowa, and Texas.
+
+##B.2 Recruit respondents
+Sampling Breakdown by Demographic Group:
+- Urban Voters: 500 participants per state (total 2,000) – reached through local community organizations and online forums.
+- Suburban Voters: 400 participants per state (total 1,600) – reached via neighborhood associations and targeted social media campaigns.
+- Rural Voters: 100 participants per state (total 400) – reached through local agricultural fairs and county events.
+- Additional Participants: 1,600 participants – evenly distributed among all demographics to reach the total sample size.
+Stratified Random Sampling:
+Stratify by demographic factors such as age, gender, ethnicity, and socioeconomic status.
+Ensure representation reflects the diversity of the targeted communities, based on recent census data.
+Weighting Strategy:
+Implement post-stratification weighting to correct for any overrepresentation or underrepresentation within the sample, ensuring it aligns with the overall voter demographic in the selected states.
+
+##B.3 Data validation
+Techniques for Data Quality:
+Eligibility Verification: Implement screening questions to confirm respondent eligibility (e.g., age, voter registration status).
+Data Cleaning Procedures: Utilize automated checks for inconsistencies, such as duplicate responses or incomplete surveys, followed by manual review of flagged entries.
+Follow-Up Verification: Conduct a follow-up survey with a random sample of participants to validate the accuracy of the original responses, ensuring reliability in the findings.
+
+##B.4 Other relevant aspects of interest
+Other relevant aspects of interest could be:
+Voter Registration Status: Confirm whether people are registered for the upcoming election.
+Candidates' Choices: Provide a brief overview of the major candidates and their platforms, helping voters consider their positions on essential issues like the economy, healthcare, and climate change.
+Personal Values and Future Vision: Define each person's vision for the country’s future and the progress they wish to see in areas such as healthcare, education, or environmental policy. This can help identify which candidates’ policies and values align with their vision.
+
+##B.5 Google Form Link 
+This survey aims to leverage the strengths of online platforms to maximize participation and ensure a diverse respondent pool. Online surveys provide unique advantages, allowing respondents to participate at a time and place that suits them, which is particularly helpful for busy individuals with varying schedules. To enhance accessibility, I designed the survey as an online format, allowing people to complete it from any location with internet access. The survey is intentionally concise, designed to be quick and easy to complete, which helps keep participants engaged and minimizes the risk of incomplete responses. This approach reflects a commitment to inclusivity and data quality, aiming to gather valuable insights from a wide array of perspectives while adhering to established best practices in survey design.
+
+Survey Platform: Google Forms
+Link: https://docs.google.com/forms/d/e/1FAIpQLScllb1CYoM3EWHs8txFgmkeeONR3CUUc4WkV1IhX58beM08Ow/viewform?usp=sf_link
+
+Survey Structure: 
+Demographics Section: Age, gender, ethnicity, income, education, and demographics residence. Age, gender, ethnicity, income, education, and place of residence. 
+Voting Preferences Section: Voter Registration Status and Candidates choice.
+Personal Values and Vision: Public Sentiment and Values and Priorities (e.g., economy, climate change, Immigration)
+Thank You Message
+
+\newpage
+
+
+# References
+
+
