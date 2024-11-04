@@ -1,6 +1,5 @@
 ---
-title: "Election Predictions:A Data-Driven Approach to US Election Forecasting"
-subtitle: "My subtitle if needed"
+title: "Election Predictions: A Data-Driven Approach to US Election Forecasting"
 author: 
   - Ziheng Wang
   - Manjun Zhu
@@ -55,9 +54,7 @@ The remainder of this paper is structured as follows. @sec-data...
 # Data {#sec-data}
 
 ## Overview
-We obtained the "Presidential General Election Polls" dataset from FiveThirtyEight [@FiveThirtyEight2024] and conducted an in-depth analysis using the R programming language [@citeR].
-This analysis utilizes a dataset containing polling data for the 2024 U.S. Presidential Election. It includes key details such as the quality of each poll, sample size, geographic scope, and the timing of data collection. The dataset is designed to track voter support trends for the candidates Kamala Harris and Donald Trump.
-The data were obtained from FiveThirtyEight’s national polling dataset for the 2024 U.S. presidential election. This dataset, published on FiveThirtyEight’s platform, contains comprehensive polling data collected by various polling organizations. It includes information such as polling dates, candidate preferences, sample sizes, and margins of error for general election polling conducted across the United States. The data is collected from January 2024 to the present, capturing public opinion trends leading up to the 2024 election and allowing for analysis of voter sentiment over time and across different demographics and regions.
+We obtained the "Presidential General Election Polls" dataset from FiveThirtyEight [@FiveThirtyEight2024] and conducted an in-depth analysis using the R programming language [@citeR]. This analysis utilizes a dataset containing polling data for the 2024 U.S. Presidential Election. It includes key details such as the quality of each poll, sample size, geographic scope, and the timing of data collection. The dataset is designed to track voter support trends for the candidates Kamala Harris and Donald Trump. The data were obtained from FiveThirtyEight’s national polling dataset for the 2024 U.S. presidential election. This dataset, published on FiveThirtyEight’s platform, contains comprehensive polling data collected by various polling organizations. It includes information such as polling dates, candidate preferences, sample sizes, and margins of error for general election polling conducted across the United States. The data is collected from January 2024 to the present, capturing public opinion trends leading up to the 2024 election and allowing for analysis of voter sentiment over time and across different demographics and regions.
 
 ## Measurement
 For this analysis, the dataset comprises polling information gathered from multiple sources, each employing distinct methodologies and inherent biases. Although adjustments and weighting are applied to address these differences, limitations may persist, particularly regarding sample representation and measurement error. Polls with lower quality scores or limited transparency may contribute additional variability to the analysis.
@@ -476,5 +473,11 @@ Thank You Message
 
 
 # References
+R Core Team. 2023. R: A Language and Environment for Statistical Computing. Vienna,
+Austria: R Foundation for Statistical Computing. https://www.R-project.org/.
+
+Wickham, Hadley. 2016. Ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New
+York. https://ggplot2.tidyverse.org.
+
 
 
