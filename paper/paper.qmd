@@ -4,7 +4,7 @@ author:
   - Ziheng Wang
   - Manjun Zhu
   - Dong Jun Yoon
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+thanks: "Code and data are available at: [https://github.com/zero00499/2024_US_election_forecasting.git](https://github.com/zero00499/2024_US_election_forecasting.git)."
 date: today
 date-format: long
 abstract: This paper analyzes the distribution of voter preferences across demographics and regions in the United States using both simulated and survey data. Key findings reveal significant variations in political leanings based on race, gender, education level, and geographic location (urban vs. rural), with distinct approval patterns for candidates like Joe Biden and Kamala Harris. Additionally, comparisons between states highlight differences in safety and economic concerns among voters, which correlate with their past voting behavior. This study underscores the importance of post-stratification adjustments in survey data to achieve a more accurate representation of public opinion, shedding light on demographic-driven electoral dynamics that impact the political landscape.
