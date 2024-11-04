@@ -35,20 +35,13 @@ library(knitr)
 *Overview* 
 Presidential elections are among the most significant events in American politics, shaping the political and economic landscape for the next four years. The outcome of the 2024 U.S. election will influence not only the American economy but also the global economy. In this context, accurately forecasting electoral outcomes is crucial for anticipating shifts in political power and predicting economic policies.
 
-Polling is a commonly used tool to understand public opinion. However, it may lack accuracy due to various biases, such as social desirability bias, non-response bias, and sampling error. In this paper, we attempt to construct a model measures ....
+Polling is a commonly used tool to understand public opinion. However, it may lack accuracy due to various biases, such as social desirability bias, non-response bias, and sampling error. In this paper, we attempt to construct a model measures influencial factors to pct.
 
 *Estimand* 
 In this paper the estimand is the percentage of support of each candidate, Donald Trump and Hamala Harris. We construct a linear model to estimate various predictors, which are transparency score, poll score, numeric grade, state, sample size, number of days. The model is used to identify the most influential factor for preferences of pollsters and analyze relationships between variables.
 
-*Results paragraph:* Summarize the key findings of the model, highlighting its predictive accuracy and implications.
-
 *Why it matter* 
 Our findings are helpful to political scholars who work on current political dynamics, economic policy analysts and sociologists, as we provide in-depth understanding of influential factors of pollster’s preference and predict the winner of the election. Different candidates have different economic plans due to their different opinions on the economy.
-
-Telegraphing paragraph: 
-The remainder of this paper is structured as follows: Section 2 details the data and measurement process; Section 3 covers model development and results; Section 4 discusses implications and future steps.
-The remainder of this paper is structured as follows. @sec-data...
-
 
 
 # Data {#sec-data}
