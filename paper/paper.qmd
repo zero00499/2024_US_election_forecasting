@@ -1,5 +1,6 @@
 ---
-title: "Election Predictions: A Data-Driven Approach to US Election Forecasting"
+title: "Election Predictions:A Data-Driven Approach to US Election Forecasting"
+subtitle: "My subtitle if needed"
 author: 
   - Ziheng Wang
   - Manjun Zhu
@@ -54,7 +55,9 @@ The remainder of this paper is structured as follows. @sec-data...
 # Data {#sec-data}
 
 ## Overview
-We obtained the "Presidential General Election Polls" dataset from FiveThirtyEight [@FiveThirtyEight2024] and conducted an in-depth analysis using the R programming language [@citeR]. This analysis utilizes a dataset containing polling data for the 2024 U.S. Presidential Election. It includes key details such as the quality of each poll, sample size, geographic scope, and the timing of data collection. The dataset is designed to track voter support trends for the candidates Kamala Harris and Donald Trump. The data were obtained from FiveThirtyEight’s national polling dataset for the 2024 U.S. presidential election. This dataset, published on FiveThirtyEight’s platform, contains comprehensive polling data collected by various polling organizations. It includes information such as polling dates, candidate preferences, sample sizes, and margins of error for general election polling conducted across the United States. The data is collected from January 2024 to the present, capturing public opinion trends leading up to the 2024 election and allowing for analysis of voter sentiment over time and across different demographics and regions.
+We obtained the "Presidential General Election Polls" dataset from FiveThirtyEight [@FiveThirtyEight2024] and conducted an in-depth analysis using the R programming language [@citeR].
+This analysis utilizes a dataset containing polling data for the 2024 U.S. Presidential Election. It includes key details such as the quality of each poll, sample size, geographic scope, and the timing of data collection. The dataset is designed to track voter support trends for the candidates Kamala Harris and Donald Trump.
+The data were obtained from FiveThirtyEight’s national polling dataset for the 2024 U.S. presidential election. This dataset, published on FiveThirtyEight’s platform, contains comprehensive polling data collected by various polling organizations. It includes information such as polling dates, candidate preferences, sample sizes, and margins of error for general election polling conducted across the United States. The data is collected from January 2024 to the present, capturing public opinion trends leading up to the 2024 election and allowing for analysis of voter sentiment over time and across different demographics and regions.
 
 ## Measurement
 For this analysis, the dataset comprises polling information gathered from multiple sources, each employing distinct methodologies and inherent biases. Although adjustments and weighting are applied to address these differences, limitations may persist, particularly regarding sample representation and measurement error. Polls with lower quality scores or limited transparency may contribute additional variability to the analysis.
@@ -341,14 +344,13 @@ In conclusion, the integration of interaction terms within the linear regression
 
 
 # Results
+## Result of Model 1
+for model 1 we focus on two predictors, which are the end date and candidates. We build a linear regression model to identify the relationship between pct and two variables end date and candidate. The median is 0.1306, which is very small. In this context, if we only consider end date, their pct is very close.
 
-Our results are summarized in @tbl-modelresults.
-##Result of Model 1
+## Result of Model 2
+for model 2 we added more predictors, including transparency_score, party, state, duration, candidate_name. We build a multivariable linear regression to identify predictors for pct in swing states. from the previous model(@fig-model2), we can see transparency score, duration and few states have negative coefficients. 
 
-
-for model 2 we added more predictors, including transparency_score, party, state, duration, candidate_name. The intercept is 47.65618
-
-Overall, the expanded Model 2 captures more variation in support, with state, poll score, and pollster contributing significantly to the predictive power.
+Generally, Model 2 has more predictors than model 1 and it is more predictive than model 1
 
 ```{r}
 #| echo: false
@@ -364,36 +366,28 @@ first_model <-
 
 
 ```
-```
 
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
 
 # Discussion
+## Interpretation of Model 1 Findings
+Model 1 examined the relationship between the percentage (pct) and two primary predictors: the end date and the candidate. The linear regression analysis yielded a median effect size of 0.1306, indicating that both the end date and the candidate have minimal individual impacts on the pct. This suggests that when only these two variables are considered, the variation in pct across different candidates and end dates is relatively insignificant. The closeness of pct values implies that neither the timing of the campaign's conclusion nor the identity of the candidate alone are strong determinants of electoral performance within the scope of this model.
 
-## First discussion point {#sec-first-point}
+This limited influence observed in Model 1 underscores the necessity of incorporating additional variables to capture the complexities of electoral dynamics. Relying solely on temporal factors and candidate identity may overlook critical elements that drive voter behavior and election outcomes.
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+Enhanced Insights from Model 2
+To build upon the initial findings, Model 2 introduced additional predictors: transparency_score, party, state, duration, and candidate_name. This multivariable linear regression aimed to provide a more nuanced understanding of the factors influencing pct in swing states.
 
-## Second discussion point
+The inclusion of transparency_score and duration revealed significant negative coefficients. Specifically, higher transparency scores are associated with a decrease in pct, while longer campaign durations also correlate with lower pct values. These findings suggest that increased transparency, while generally perceived positively, may lead to voter skepticism or fatigue, thereby reducing electoral support. Similarly, extended campaign durations might contribute to voter disengagement or diminishing enthusiasm over time.
 
-Please don't use these as sub-heading labels - change them to be what your point actually is.
+Additionally, the identification of certain states with negative coefficients highlights the unique political landscapes and voter behaviors inherent to these regions. These states may possess specific demographic, socioeconomic, or political characteristics that influence the effectiveness of campaign strategies and, consequently, the pct outcomes.
 
-## Third discussion point
+## Implications for Campaign Strategy and Policy
+The results from Model 2 offer valuable insights for political campaigns targeting swing states. The negative association between transparency and pct indicates a delicate balance that campaigns must maintain. While transparency is crucial for building trust, excessive disclosure or perceived overexposure might inadvertently erode voter support. Campaigns should therefore strategize on maintaining transparency without overwhelming the electorate.
+
+## The inverse relationship
+between campaign duration and pct emphasizes the importance of timing and sustained engagement. Prolonged campaigns may lead to voter fatigue, suggesting that concentrated and strategic campaigning within optimal timeframes could be more effective in securing higher pct values.
+
+Furthermore, the state-specific negative coefficients imply that tailored strategies are essential. Understanding the unique attributes of each swing state can inform targeted approaches that resonate with local voter concerns and preferences, enhancing overall campaign efficacy.
 
 ## Weaknesses and next steps
 
@@ -410,7 +404,7 @@ Future research can enhance this study by incorporating real-time data streams, 
 \appendix
 
 # Appendix {-}
-## Appendix A: Pollster Methodology Overview {-}（改）
+## Appendix A: Emerson College Pollster Methodology Overview {-}
 Emerson College Polling is a non-partisan organization which established 25 years ago as classroom excercise and was transformed into an innovative, nationally-ranked polling center in 2012 (@Aboutus). In general, the emerson college define their population to be "registered voters, likely voters, or residents"(@Aboutus), but for the 2024 US President Election Poll, the population is defined to be only "likely voters" based on "2024 national poll".
 
 Emerson College Polling recruits respondents using a diverse recruitment strategy, including "MMS-to-Online", "Online Opt-in Panel", "IVR (Interactive Voice Response)" (@Aboutus & Polls). Generally there is an additional approach named "Emails"(@Aboutus), but we did not find the sign that it was used in 2024 Election surveys(National polling), so we do not include it in this paper. "MMS-to-Online" is an approach which the target population receive text messages with a custom graphic that invite them to take the online-survey hosted on Qualtrics. The respondents are select randomly from "state voter files provided by Aristotle". In Online Opt-in Panel approach, respondents are invited to take a "screening questionnaire"(@Aboutus) through an online opt-in panel "provided by CINT"(@Aboutus), respondents who pass the screening questionnaire are directed to the survey. Data quality are measured using additional screening questions, respondents who do not meet data quality measures are removed from the survey. Based on "Polling", respondents are selected from "L2 voter file data provided by Rep Data". In IVR (Interactive Voice Response) approach, respondents reveive automated calls, they answer the survey using their telepones.IVR is not used in some states where it is prohibited (@Aboutus) Respondents are selected randomly from "state voter files, provided by Aristotle"(@Aboutus).
@@ -429,11 +423,11 @@ While Emerson(2024) focuses on asking straightforward questions, it may limit th
 
 ## Appendix B: Methodology and Survey Design for 2024 U.S. Presidential Election Forecast
 
-##B.1 Sampling approach
+## B.1 Sampling approach
 Total Sample Size: 6,000 respondents (1,000 participants per targeted demographic).
 Target Population: Eligible voters across the following key demographics: urban areas, suburban regions, and rural communities in swing states: Florida, Ohio, Iowa, and Texas.
 
-##B.2 Recruit respondents
+## B.2 Recruit respondents
 Sampling Breakdown by Demographic Group:
 - Urban Voters: 500 participants per state (total 2,000) – reached through local community organizations and online forums.
 - Suburban Voters: 400 participants per state (total 1,600) – reached via neighborhood associations and targeted social media campaigns.
@@ -445,19 +439,19 @@ Ensure representation reflects the diversity of the targeted communities, based 
 Weighting Strategy:
 Implement post-stratification weighting to correct for any overrepresentation or underrepresentation within the sample, ensuring it aligns with the overall voter demographic in the selected states.
 
-##B.3 Data validation
+## B.3 Data validation
 Techniques for Data Quality:
 Eligibility Verification: Implement screening questions to confirm respondent eligibility (e.g., age, voter registration status).
 Data Cleaning Procedures: Utilize automated checks for inconsistencies, such as duplicate responses or incomplete surveys, followed by manual review of flagged entries.
 Follow-Up Verification: Conduct a follow-up survey with a random sample of participants to validate the accuracy of the original responses, ensuring reliability in the findings.
 
-##B.4 Other relevant aspects of interest
+## B.4 Other relevant aspects of interest
 Other relevant aspects of interest could be:
 Voter Registration Status: Confirm whether people are registered for the upcoming election.
 Candidates' Choices: Provide a brief overview of the major candidates and their platforms, helping voters consider their positions on essential issues like the economy, healthcare, and climate change.
 Personal Values and Future Vision: Define each person's vision for the country’s future and the progress they wish to see in areas such as healthcare, education, or environmental policy. This can help identify which candidates’ policies and values align with their vision.
 
-##B.5 Google Form Link 
+## B.5 Google Form Link 
 This survey aims to leverage the strengths of online platforms to maximize participation and ensure a diverse respondent pool. Online surveys provide unique advantages, allowing respondents to participate at a time and place that suits them, which is particularly helpful for busy individuals with varying schedules. To enhance accessibility, I designed the survey as an online format, allowing people to complete it from any location with internet access. The survey is intentionally concise, designed to be quick and easy to complete, which helps keep participants engaged and minimizes the risk of incomplete responses. This approach reflects a commitment to inclusivity and data quality, aiming to gather valuable insights from a wide array of perspectives while adhering to established best practices in survey design.
 
 Survey Platform: Google Forms
@@ -473,11 +467,5 @@ Thank You Message
 
 
 # References
-R Core Team. 2023. R: A Language and Environment for Statistical Computing. Vienna,
-Austria: R Foundation for Statistical Computing. https://www.R-project.org/.
-
-Wickham, Hadley. 2016. Ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New
-York. https://ggplot2.tidyverse.org.
-
 
 
