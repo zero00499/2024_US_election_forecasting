@@ -33,7 +33,7 @@ if (nrow(analysis_data) == 2000) {
   stop("Test Failed: The dataset does not have 2000 rows.")
 }
 
-# Check if the dataset has 3 columns
+# Check if the dataset has 7 columns
 if (ncol(analysis_data) == 7) {
   message("Test Passed: The dataset has 7 columns.")
 } else {
@@ -67,21 +67,21 @@ if (all(analysis_data$party %in% valid_parties)) {
   stop("Test Failed: The 'party' column contains invalid party names.")
 }
 
-# Check if there are any missing values in the dataset
+# Check if missing values
 if (all(!is.na(analysis_data))) {
   message("Test Passed: The dataset contains no missing values.")
 } else {
   stop("Test Failed: The dataset contains missing values.")
 }
 
-# Test no empty strings in 'state' or 'pollster' columns
+# Test no empty strings in 'state' or 'pollster' 
 if (all(simulated_data$state != "" & simulated_data$pollster != "")) {
   message("Test Passed: No empty strings in 'state' or 'pollster' columns.")
 } else {
   stop("Test Failed: Empty strings found in 'state' or 'pollster' columns.")
 }
 
-# Check if the 'party' column has at least two unique values
+# Check if the 'party' column
 if (n_distinct(analysis_data$party) >= 2) {
   message("Test Passed: The 'party' column contains at least two unique values.")
 } else {
