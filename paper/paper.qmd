@@ -466,5 +466,19 @@ Thank You Message
 
 
 # References
+R Core Team. 2023. R: A Language and Environment for Statistical Computing. Vienna,
+Austria: R Foundation for Statistical Computing. https://www.R-project.org/.
+
+Rohan Alexander. 2023. Telling Stories with Data. Chapman; Hall/CRC. https://tellingstorieswithdata.com/.
+
+Wickham, Hadley. 2016. Ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New
+York. https://ggplot2.tidyverse.org.
+
+Wickham, Hadley, Jim Hester, and Jennifer Bryan. 2024. Readr: Read Rectangular Text Data.
+27. https://readr.tidyverse.org.
+
+Emerson. 2024. ECP_Swing_States_10.10.24. https://docs.google.com/spreadsheets/d/1KdGpVQ0P7AVCDB5vsfoukqF6tS2ghVAo/edit?gid=1979448346#gid=1979448346.
+
+Emerson. 2024. October 2024 State Polls: Mixed Movement Across Swing States Shows Dead Heat. https://emersoncollegepolling.com/october-2024-state-polls-mixed-movement-across-swing-states-shows-dead-heat/.
 
 
